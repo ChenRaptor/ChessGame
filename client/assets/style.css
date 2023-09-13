@@ -339,12 +339,12 @@ h1 {
 
 .case-white {
 	background: #fff;
-	color: #515151;
+	color: #d1d1d1;
 	font-size: 12px;
 	user-select: none;
 }
 .case-black {
-	background: #515151;
+	background: #d1d1d1;
 	color: #fff;
 	font-size: 12px;
 	user-select: none;
@@ -358,4 +358,19 @@ h1 {
 
 #chessboard-grid img {
 	width: 50px;
+}
+.team-white {
+    background: #ffcccccf;
+    display: flex;
+    align-items: center;
+    border-radius: 10px;
+    justify-content: center;
+}
+
+.team-black {
+	background: #b8d1ffcf;
+    display: flex;
+    align-items: center;
+    border-radius: 10px;
+    justify-content: center;
 }

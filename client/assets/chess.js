@@ -19,58 +19,9 @@ $("#chessboard-grid").append(`
 `)
 
 
-function startGame ()
-{
-    let grid = [
-        ['T-2-1', 'C-2-1', 'F-2-1', 'D-2', 'R-2', 'F-2-2', 'C-2-2', 'T-2-2'],
-        ['P-2-1', 'P-2-2', 'P-2-3', 'P-2-4', 'P-2-5', 'P-2-6', 'P-2-7', 'P-2-8'],
-        [null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null],
-        ['P-1-1', 'P-1-2', 'P-1-3', 'P-1-4', 'P-1-5', 'P-1-6', 'P-1-7', 'P-1-8'],
-        ['T-1-1', 'C-1-1', 'F-1-1', 'D-1', 'R-1', 'F-1-2', 'C-2-2', 'T-1-2'],
-    ]
-        letters.map( (letter, letterIndex) => 
-        numbers.map( (number, numberIndex) => 
-        {
-
-            let val = grid[letterIndex][numberIndex];
-            if (val !== null)
-            {
-                let pion = val.split('-');
-                $(`#${letter}${number}`).html(`
-                    ${
-                        pion[0] === 'P' ? '<div><img src="modules/chess/img/chess-pawn.svg"/></div>' :
-                        pion[0] === 'T' ? '<img src="modules/chess/img/chess-rook.svg"/>' :
-                        pion[0] === 'C' ? '<img src="modules/chess/img/chess-knight.svg"/>' :
-                        pion[0] === 'F' ? '<img src="modules/chess/img/chess-bishop.svg"/>' :
-                        pion[0] === 'D' ? '<img src="modules/chess/img/chess-queen.svg"/>' : '<img src="modules/chess/img/chess-king.svg"/>'
-                    }
-                `)
-            }
-
-        }))
-}
-
-
-$("#start-chessgame").click(function ()
-{
-    startGame();
-})
-
-
-
-// $("#start-chessgame").click(function ()
+// function startGame ()
 // {
-//     socket.emit('startChessGame');
-// })
-
-
-
-// this.socket.on('startChessGame', ({grid}) => 
-// {
-//     grid = [
+//     let grid = [
 //         ['T-2-1', 'C-2-1', 'F-2-1', 'D-2', 'R-2', 'F-2-2', 'C-2-2', 'T-2-2'],
 //         ['P-2-1', 'P-2-2', 'P-2-3', 'P-2-4', 'P-2-5', 'P-2-6', 'P-2-7', 'P-2-8'],
 //         [null, null, null, null, null, null, null, null],
@@ -78,36 +29,66 @@ $("#start-chessgame").click(function ()
 //         [null, null, null, null, null, null, null, null],
 //         [null, null, null, null, null, null, null, null],
 //         ['P-1-1', 'P-1-2', 'P-1-3', 'P-1-4', 'P-1-5', 'P-1-6', 'P-1-7', 'P-1-8'],
-//         ['T-1-1', 'C-1-1', 'F-1-1', 'D-1', 'R-1', 'F-1-2', 'C-2-2', 'T-1-2'],
+//         ['T-1-1', 'C-1-1', 'F-1-1', 'D-1', 'R-1', 'F-1-2', 'C-1-2', 'T-1-2'],
 //     ]
+//         letters.map( (letter, letterIndex) => 
+//         numbers.map( (number, numberIndex) => 
+//         {
 
-//     letters.map( (letter, letterIndex) => numbers.map( (number, numberIndex) => {
-//         pion = grid[numberIndex][letterIndex].split('-');
-//         $(`#${letter}${number}`).append(`
-//             ${pion[0]}
-//         `)
+//             let val = grid[letterIndex][numberIndex];
+//             if (val !== null)
+//             {
+//                 let pion = val.split('-');
+//                 $(`#${letter}${number}`).html(`
+//                     ${
+//                         pion[0] === 'P' ? `<div class="team-${pion[1] === '1' ? 'white' : 'black' }"><img src="modules/chess/img/chess-pawn.svg"/></div>` :
+//                         pion[0] === 'T' ? `<div class="team-${pion[1] === '1' ? 'white' : 'black' }"><img src="modules/chess/img/chess-rook.svg"/></div>` :
+//                         pion[0] === 'C' ? `<div class="team-${pion[1] === '1' ? 'white' : 'black' }"><img src="modules/chess/img/chess-knight.svg"/></div>` :
+//                         pion[0] === 'F' ? `<div class="team-${pion[1] === '1' ? 'white' : 'black' }"><img src="modules/chess/img/chess-bishop.svg"/></div>` :
+//                         pion[0] === 'D' ? `<div class="team-${pion[1] === '1' ? 'white' : 'black' }"><img src="modules/chess/img/chess-queen.svg"/></div>` : `<div class="team-${pion[1] === '1' ? 'white' : 'black' }"><img src="modules/chess/img/chess-king.svg"/></div>`
+//                     }
+//                 `)
+//             }
 
-
-
-//     }))
-
-
-
-
-
-//     for (let numberIndex = 0; numberIndex < 8; numberIndex++) {
-//         for (let letterIndex = 0; letterIndex < 8; letterIndex++) {
-
-
-//             pion = grid[numberIndex][letterIndex].split('-')
-
-
-//             $(`#${letter}${number}`)
+//         }))
+// }
 
 
-//             pion[0] === 'T' ? <
-//         }
-//     }
-// });
+// $("#start-chessgame").click(function ()
+// {
+//     startGame();
+// })
 
 
+
+$("#start-chessgame").click(function ()
+{
+    socket.emit('startChessGame');
+})
+
+
+socket.on('startChessGame', ({grid}) => 
+{
+    console.log(grid)
+    letters.map( (letter, letterIndex) => 
+    numbers.map( (number, numberIndex) => 
+    {
+
+        let val = grid[letterIndex][numberIndex];
+        if (val !== null)
+        {
+            console.log(val)
+            $(`#${letter}${number}`).html(`
+                ${
+                    val.type === 'Pawn' ? `<div class="team-${val.team === 1 ? 'white' : 'black' }"><img src="modules/chess/img/chess-pawn.svg"/></div>` :
+                    val.type === 'Rook' ? `<div class="team-${val.team === 1 ? 'white' : 'black' }"><img src="modules/chess/img/chess-rook.svg"/></div>` :
+                    val.type === 'Knight' ? `<div class="team-${val.team === 1 ? 'white' : 'black' }"><img src="modules/chess/img/chess-knight.svg"/></div>` :
+                    val.type === 'Bishop' ? `<div class="team-${val.team === 1 ? 'white' : 'black' }"><img src="modules/chess/img/chess-bishop.svg"/></div>` :
+                    val.type === 'Queen' ? `<div class="team-${val.team === 1 ? 'white' : 'black' }"><img src="modules/chess/img/chess-queen.svg"/></div>` : 
+                    `<div class="team-${val.team === 1 ? 'white' : 'black' }"><img src="modules/chess/img/chess-king.svg"/></div>`
+                }
+            `)
+        }
+
+    }))
+})

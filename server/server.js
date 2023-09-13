@@ -8,6 +8,7 @@ var fs = require('fs');			// Accès au système de fichier
 
 // Chargement des modules perso
 var daffy = require('./modules/daffy.js');
+var {ManagerChess} = require('./modules/chess/ManagerChess.js');
 
 // Initialisation du serveur HTTP
 var app = express();
@@ -61,6 +62,20 @@ io.sockets.on('connection', function(socket)
 		const data = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
 		socket.emit("getEmojisDataBase", {data});
 	})
+
+	socket.on('startChessGame', function () 
+	{
+		socket.join("chessRoom");
+		let chessGame = new ManagerChess()
+		let data = {grid: chessGame.setupGame()}
+		io.to("chessRoom").emit("startChessGame", data);
+	})
+
+
+
+
+
+
 
 });
 
