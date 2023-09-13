@@ -349,3 +349,13 @@ h1 {
 	font-size: 12px;
 	user-select: none;
 }
+
+#start-chessgame {
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
+#chessboard-grid img {
+	width: 50px;
+}
