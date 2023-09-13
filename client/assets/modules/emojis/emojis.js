@@ -13,7 +13,6 @@ class EmojisManager
 
         this.socket.on('getEmojisDataBase', ({data}) => 
         {
-            console.log(data)
             this.emojis = data
         });
     }

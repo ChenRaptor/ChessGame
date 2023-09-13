@@ -8,6 +8,7 @@ var fs = require('fs');			// Accès au système de fichier
 
 // Chargement des modules perso
 var daffy = require('./modules/daffy.js');
+var chess = require('./modules/chess.js');
 
 // Initialisation du serveur HTTP
 var app = express();
@@ -39,6 +40,8 @@ io.sockets.on('connection', function(socket)
 	{
 		// Stocke le nom de l'utilisateur dans l'objet socket
 		socket.name = name;
+
+		chess.handleActiveUsers(io, io.sockets.sockets)
 	});
 	
 	
@@ -55,12 +58,21 @@ io.sockets.on('connection', function(socket)
 		daffy.handleDaffy(io, message);
 	});
 
+	socket.on('chess_game', (userId) =>
+	{
+		io.to(userId).emit("chess_invitation");		
+	});
+
 	socket.on('getEmojisDataBase', function()
 	{
 		const jsonPath = path.join(process.cwd(), 'modules/emojis.json');
 		const data = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
 		socket.emit("getEmojisDataBase", {data});
 	})
+
+	socket.on("disconnect", () => {
+		chess.handleActiveUsers(io, io.sockets.sockets)
+	});
 
 });
 

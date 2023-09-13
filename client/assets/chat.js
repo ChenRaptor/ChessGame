@@ -1,9 +1,4 @@
-﻿
-
-// let emojisDataBase;
-
-
-// Connexion au socket
+﻿// Connexion au socket
 var socket = io.connect(':8090');
 
 const emojisManager = new EmojisManager()
@@ -16,11 +11,18 @@ socket.emit('user_enter', name);
 // Gestion des événements diffusés par le serveur
 socket.on('new_message', receiveMessage);
 
+const chess = new ChessChat(document.querySelector('.users-proposal'))
+
+
+
+
+const input = $('#message-input');
+
 // Action quand on clique sur le bouton "Envoyer"
 $('#send-message').click(sendMessage);
 
 // Action quand on appuye sur la touche [Entrée] dans le champ de message (= comme Envoyer)
-$('#message-input').keyup(function(evt)
+input.keyup(function(evt)
 {
 	if (evt.keyCode == 13) // 13 = touche Entrée
 		sendMessage();
@@ -32,9 +34,10 @@ $('#help-toggle').click(function()
         $('#help-content').fadeToggle('fast');
 });
 
-$('#message-input').keyup(function(e)
+input.keyup(function(e)
 {
-	$('#message-input').val(emojisManager.setEmojisInMessage($('#message-input').val()))
+	input.val(emojisManager.setEmojisInMessage(input.val()))
+	chess.stringAnalyse(input.val())
 });
 
 
@@ -58,7 +61,7 @@ $('#set-emoji').click(function() {
 		$('.pannel-emojis-button').click((item) => {
 			let val = item.target.id.split('pannel-emojis-button-').join('')
 			let index = emojis.findIndex((element) => element.codes === val)
-			$('#message-input').val(`${$('#message-input').val()}${emojis[index].emoji}`)
+			input.val(`${input.val()}${emojis[index].emoji}`)
 		})
 	}
 	else {
@@ -74,7 +77,6 @@ $('#set-emoji').click(function() {
 function sendMessage()
 {
 	// Récupère le message, puis vide le champ texte
-	var input = $('#message-input');
 	var message = input.val();	
 
 	input.val('');
@@ -84,7 +86,8 @@ function sendMessage()
 		return;
 	
 	// Envoi le message au serveur pour broadcast
-	socket.emit('message', message);
+	socket.emit('message', message)
+	
 }
 
 /**
