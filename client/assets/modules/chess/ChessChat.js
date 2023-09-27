@@ -1,22 +1,12 @@
 class ChessChat 
 {
-
-    constructor (modal) 
+    constructor (modal, socket, userName) 
     {
         this.socket = io.connect(':8090');
         this.activeUsers = false
         this.userListModal = modal;
-        
-        this.chessInvitationModal = `
-            <aside class="chess_invitation">
-                <h2>Chess game</h2>
-                <h2>Tu a s été invité à un jeu d'echec</h2>
-                <div>
-                    <button>Accepté</button>
-                    <button>Refusé</button>
-                </div>
-            </aside>
-        `
+        this.socket = socket
+        this.userName = userName
         this.start();
     }
 
@@ -27,8 +17,8 @@ class ChessChat
             this.setActiveUsers(users);
             this.injectUser()
         })
-
-        socket.on('chess_invitation', () => this.gotInvited());
+        socket.on('chess_invitation', (sender) => this.gotInvited(sender));
+        socket.on('chess_game_prepared', (url) => this.disconnectAndGoToTheRoom(url));
     }
 
     setActiveUsers(users)
@@ -38,38 +28,75 @@ class ChessChat
 
     injectUser()
     {
-        this.userListModal.innerHTML = (this.activeUsers ?? []).map((user) => user.name ? `
+        this.userListModal.innerHTML = (this.activeUsers ?? []).map((user) => user.name !== this.userName 
+        ? `
             <li>
-                <button>${user.name}</button>
+                <button data-id="${user.id}">${user.name}</button>
             </li>
         ` : "").join('');
 
         this.userListModal.querySelectorAll('button').forEach((btn, index) => {
             btn.addEventListener('click', () => 
-                socket.emit('chess_game', this.activeUsers[index].id)
+                socket.emit('chess_game', btn.getAttribute('data-id'))
             )
         })
     }
 
     stringAnalyse(string) 
     {
-        string.includes('/chess @')
+        string.includes('/chess')
             ? this.userListModal.classList.remove('hide')
             : !this.userListModal.classList.contains('hide') 
                 ? this.userListModal.classList.add('hide') 
                 : ""
 	}
 
-    gotInvited()
+    gotInvited(sender)
     {
-        document.body.innerHTML += this.chessInvitationModal;
-        // document.querySelectorAll('chess_invitation button').forEach(btn => 
-        //     btn.addEventListener('click', () => 
-        //         console.log('test');
-        //     )    
-        // );
+        $('body').append(`
+            <aside class="chess_invitation">
+                <div>
+                    <h2>Chess game</h2>
+                    <p><b>${sender.name}</b> t'as invité à un jeu d'echec</p>
+                    <div>
+                        <button>Accepté</button>
+                        <button>Refusé</button>
+                    </div>
+                </div>
+            </aside>
+        `)
         
+        // document.body.innerHTML += `
+        //     <aside class="chess_invitation">
+        //         <div>
+        //             <h2>Chess game</h2>
+        //             <p><b>${sender.name}</b> t'as invité à un jeu d'echec</p>
+        //             <div>
+        //                 <button>Accepté</button>
+        //                 <button>Refusé</button>
+        //             </div>
+        //         </div>
+        //     </aside>
+        // `;
+
+        document.querySelectorAll('.chess_invitation button').forEach((btn, index) => 
+            btn.addEventListener('click', () => 
+                index === 0 ? socket.emit('chess_game_start', {id: sender.id, name: sender.name}) : this.removeChessInvitationModal()
+            )    
+        );
+       
     }
 
+    removeChessInvitationModal()
+    {
+        $('.chess_invitation').remove();
+    }
+
+    disconnectAndGoToTheRoom(url) {
+        document.cookie = `id=${this.socket.id}`;
+        document.cookie += `&&name=${this.userName}`;
+        socket.disconnect();
+        window.location.href = url
+    }
 
 }

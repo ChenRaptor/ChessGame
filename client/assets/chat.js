@@ -11,10 +11,7 @@ socket.emit('user_enter', name);
 // Gestion des événements diffusés par le serveur
 socket.on('new_message', receiveMessage);
 
-const chess = new ChessChat(document.querySelector('.users-proposal'))
-
-
-
+const chess = new ChessChat(document.querySelector('.users-proposal'), socket, name)
 
 const input = $('#message-input');
 
@@ -31,7 +28,7 @@ input.keyup(function(evt)
 // Action quand on clique sur le bouton Aide (?)
 $('#help-toggle').click(function()
 {
-        $('#help-content').fadeToggle('fast');
+	$('#help-content').fadeToggle('fast');
 });
 
 input.keyup(function(e)

@@ -8,11 +8,15 @@
         <script src="/socket.io/socket.io.js"></script> <!-- fichier injecté par NodeJS -->
         
         <link rel="stylesheet" href="style.css" />
-        <link rel="stylesheet" href="/modules/daffy/daffy.css" />
+        <link rel="stylesheet" href="/modules/chess/chessGame.css" />
         <script src="chess.js" defer></script>
     </head>
     <body>
         <div id="chesstable-frame">
+            <aside class="players">
+                <h1>Les joueurs</h1>
+                <ul></ul>
+            </aside>
             <div id="chesstable">
                 <div id="team-white">
 

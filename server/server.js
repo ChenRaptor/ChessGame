@@ -1,4 +1,6 @@
-﻿// Chargement des dépendances
+﻿
+
+// Chargement des dépendances
 var express = require('express');	// Framework Express
 var http = require('http');		// Serveur HTTP
 var ioLib = require('socket.io');	// WebSocket
@@ -17,6 +19,8 @@ var server = http.createServer(app);
 
 // Initialisation du websocket
 var io = ioLib(server);
+
+chess.setIo(io)
 
 // Traitement des requêtes HTTP (une seule route pour l'instant = racine)
 app.get('/', function(req, res)
@@ -40,8 +44,7 @@ io.sockets.on('connection', function(socket)
 	{
 		// Stocke le nom de l'utilisateur dans l'objet socket
 		socket.name = name;
-
-		chess.handleActiveUsers(io, io.sockets.sockets)
+		chess.handleConnectedUser(socket, "add")
 	});
 	
 	
@@ -58,10 +61,7 @@ io.sockets.on('connection', function(socket)
 		daffy.handleDaffy(io, message);
 	});
 
-	socket.on('chess_game', (userId) =>
-	{
-		io.to(userId).emit("chess_invitation");		
-	});
+	
 
 	socket.on('getEmojisDataBase', function()
 	{
@@ -70,11 +70,22 @@ io.sockets.on('connection', function(socket)
 		socket.emit("getEmojisDataBase", {data});
 	})
 
-	socket.on("disconnect", () => {
-		chess.handleActiveUsers(io, io.sockets.sockets)
+	socket.on("disconnect", () => 
+	{
+		chess.handleConnectedUser(socket, "remove")
 	});
 
+	socket.on('chess_game', (otherPlayerId) =>
+	{
+		io.to(otherPlayerId).emit("chess_invitation", {name: socket.name, id: socket.id});		
+	});
+
+	socket.on('chess_game_start', (otherPlayer) => 
+	{
+		chess.handleGameStart(socket, otherPlayer)
+	})
 });
 
 // Lance le serveur sur le port 8090 (http://localhost:8090)
 server.listen(8090);
+
