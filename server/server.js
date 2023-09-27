@@ -10,6 +10,8 @@ var fs = require('fs');			// Accès au système de fichier
 var daffy = require('./modules/daffy.js');
 var {ManagerChess} = require('./modules/chess/ManagerChess.js');
 
+let chessGame = new ManagerChess()
+
 // Initialisation du serveur HTTP
 var app = express();
 
@@ -66,10 +68,15 @@ io.sockets.on('connection', function(socket)
 	socket.on('startChessGame', function () 
 	{
 		socket.join("chessRoom");
-		let chessGame = new ManagerChess()
 		let data = {grid: chessGame.setupGame()}
 		io.to("chessRoom").emit("startChessGame", data);
 	})
+
+    socket.on("pieceMove", function (data)
+	{
+		let feedback = {grid: chessGame.moveTo(data.case0, data.case1)}
+		io.to("chessRoom").emit("pieceMove", feedback);
+	});
 
 
 
