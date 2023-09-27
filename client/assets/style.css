@@ -374,3 +374,11 @@ h1 {
     border-radius: 10px;
     justify-content: center;
 }
+
+#info {
+	background: #fff;
+	position: absolute;
+	right: 0;
+	height: 100px;
+	width: 200px;
+}

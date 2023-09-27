@@ -1,8 +1,11 @@
 let letters = ['A','B','C','D','E','F','G','H']
 let numbers = ['1','2','3','4','5','6','7','8']
 let socket = io.connect(':8090')
+let interfaceUser = {
+    turn: null,
+    placement: []
+}
 
-let placement = []
 let chessboard = [
     ['A1','A2','A3','A4','A5','A6','A7','A8'],
     ['B1','B2','B3','B4','B5','B6','B7','B8'],
@@ -52,14 +55,21 @@ $("#start-chessgame").click(function ()
 })
 
 
-socket.on('startChessGame', ({grid}) => 
+socket.on('startChessGame', (data) => 
 {
-    placement = grid
+    interfaceUser = data
+    console.log(data)
+    console.log(interfaceUser)
+
+    $("#info").html(`
+    <p>Tour: ${interfaceUser.turn.numero}</p>
+    <p>Team: ${interfaceUser.turn.team === 1 ? 'Red' : 'Blue'}</p>`)
+
     letters.map( (letter, letterIndex) => 
     numbers.map( (number, numberIndex) => 
     {
 
-        let val = grid[letterIndex][numberIndex];
+        let val = data.placement[letterIndex][numberIndex];
         if (val !== null)
         {
             console.log(val)
@@ -80,30 +90,150 @@ socket.on('startChessGame', ({grid}) =>
 
 let pieceMove = [null, null]
 
+
 $('#chessboard-grid > div').click(function (event)
 {
-    
-    console.log(event.currentTarget.id)
-
-
     const [ligne, colonne] = indexOf2D(chessboard, event.currentTarget.id)
-    let caseValue = placement[ligne][colonne]
-    if (caseValue !== null) {
-        pieceMove[0] = event.currentTarget.id
-    }
-    else if (pieceMove[0]) {
-        pieceMove[1] = event.currentTarget.id
-        socket.emit("pieceMove", {
-            case0: pieceMove[0],
-            case1: pieceMove[1]
-        });
-        pieceMove = [null, null];
-    }
-    else {
-        pieceMove = [null, null];
+    let caseValue = interfaceUser.placement[ligne][colonne]
+
+    if (caseValue !== null && caseValue.team === interfaceUser.turn.team) {
+        console.log(caseValue)
+        $(`#${event.currentTarget.id}`).css('background-color', 'yellow')
+        console.log("pieceSelected")
+        socket.emit("pieceSelected", event.currentTarget.id);
     }
 
+    if (caseValue === null) {
+        console.log("pieceMovedTo")
+        socket.emit("pieceMovedTo", event.currentTarget.id);
+    }
 
+})
+
+socket.on("pieceSelected", function (data)
+{
+
+    letters.map( (letter) => numbers.map( (number) => {
+        $(`#${letter}${number}`).css('background-color', '')
+    }))
+
+    data.currentMovePossibilities.forEach(element => {
+        $(`#${chessboard[element[0]][element[1]]}`).css('background-color', 'red')
+    });
+
+    $(`#${data.caseName}`).css('background-color', 'yellow')
+
+    console.log(data)
+});
+
+
+socket.on("pieceMovedTo", function (data)
+{
+
+    letters.map( (letter) => numbers.map( (number) => {
+        $(`#${letter}${number}`).css('background-color', '')
+    }))
+    interfaceUser = data
+    console.log(data)
+
+    letters.map( (letter) => numbers.map( (number) => {
+        $(`#${letter}${number}`).html(`<span>${letter}${number}</span>`)
+    }))
+
+    $("#info").html(`
+    <p>Tour: ${interfaceUser.turn.numero}</p>
+    <p>Team: ${interfaceUser.turn.team === 1 ? 'Red' : 'Blue'}</p>`)
+
+
+    letters.map( (letter, letterIndex) => 
+    numbers.map( (number, numberIndex) => 
+    {
+
+        let val = data.placement[letterIndex][numberIndex];
+        if (val !== null)
+        {
+            // console.log(val)
+            $(`#${letter}${number}`).html(`
+                ${
+                    val.type === 'Pawn' ? `<div class="team-${val.team === 1 ? 'white' : 'black' }"><img src="modules/chess/img/chess-pawn.svg"/></div>` :
+                    val.type === 'Rook' ? `<div class="team-${val.team === 1 ? 'white' : 'black' }"><img src="modules/chess/img/chess-rook.svg"/></div>` :
+                    val.type === 'Knight' ? `<div class="team-${val.team === 1 ? 'white' : 'black' }"><img src="modules/chess/img/chess-knight.svg"/></div>` :
+                    val.type === 'Bishop' ? `<div class="team-${val.team === 1 ? 'white' : 'black' }"><img src="modules/chess/img/chess-bishop.svg"/></div>` :
+                    val.type === 'Queen' ? `<div class="team-${val.team === 1 ? 'white' : 'black' }"><img src="modules/chess/img/chess-queen.svg"/></div>` : 
+                    `<div class="team-${val.team === 1 ? 'white' : 'black' }"><img src="modules/chess/img/chess-king.svg"/></div>`
+                }
+            `)
+        }
+
+    }))
+});
+
+
+// Play
+// $('#chessboard-grid > div').click(function (event)
+// {
+    
+//     const [ligne, colonne] = indexOf2D(chessboard, event.currentTarget.id)
+//     let caseValue = interfaceUser.placement[ligne][colonne]
+
+
+//     if (caseValue !== null && caseValue.team === interfaceUser.turn.team) {
+//         pieceMove[0] = event.currentTarget.id
+//     }
+//     else if (pieceMove[0]) {
+//         pieceMove[1] = event.currentTarget.id
+//         socket.emit("pieceMove", {
+//             case0: pieceMove[0],
+//             case1: pieceMove[1]
+//         });
+//         pieceMove = [null, null];
+//     }
+//     else {
+//         pieceMove = [null, null];
+//     }
+//     console.log(pieceMove)
+// })
+
+
+
+
+
+socket.on('pieceMove', (data) => 
+{
+    interfaceUser = data
+
+
+    letters.map( (letter) => numbers.map( (number) => {
+        $(`#${letter}${number}`).html(`<span>${letter}${number}</span>`)
+    }))
+
+    $("#info").html(`
+    <p>Tour: ${interfaceUser.turn.numero}</p>
+    <p>Team: ${interfaceUser.turn.team === 1 ? 'Red' : 'Blue'}</p>`)
+
+
+    letters.map( (letter, letterIndex) => 
+    numbers.map( (number, numberIndex) => 
+    {
+
+        let val = data.placement[letterIndex][numberIndex];
+        if (val !== null)
+        {
+            // console.log(val)
+            $(`#${letter}${number}`).html(`
+                ${
+                    val.type === 'Pawn' ? `<div class="team-${val.team === 1 ? 'white' : 'black' }"><img src="modules/chess/img/chess-pawn.svg"/></div>` :
+                    val.type === 'Rook' ? `<div class="team-${val.team === 1 ? 'white' : 'black' }"><img src="modules/chess/img/chess-rook.svg"/></div>` :
+                    val.type === 'Knight' ? `<div class="team-${val.team === 1 ? 'white' : 'black' }"><img src="modules/chess/img/chess-knight.svg"/></div>` :
+                    val.type === 'Bishop' ? `<div class="team-${val.team === 1 ? 'white' : 'black' }"><img src="modules/chess/img/chess-bishop.svg"/></div>` :
+                    val.type === 'Queen' ? `<div class="team-${val.team === 1 ? 'white' : 'black' }"><img src="modules/chess/img/chess-queen.svg"/></div>` : 
+                    `<div class="team-${val.team === 1 ? 'white' : 'black' }"><img src="modules/chess/img/chess-king.svg"/></div>`
+                }
+            `)
+        }
+
+    }))
+})
 
     // if (event.currentTarget.innerHTML === '') {
     //     pieceMove[1] = event.currentTarget.id
@@ -133,38 +263,3 @@ $('#chessboard-grid > div').click(function (event)
     // else {
     //     pieceMove[0] = event.currentTarget.id
     // }
-
-    console.log(pieceMove)
-})
-
-socket.on('pieceMove', ({grid}) => 
-{
-    console.log(grid)
-    placement = grid
-
-
-    $('#chessboard-grid > div').html(``)
-
-
-    letters.map( (letter, letterIndex) => 
-    numbers.map( (number, numberIndex) => 
-    {
-
-        let val = grid[letterIndex][numberIndex];
-        if (val !== null)
-        {
-            // console.log(val)
-            $(`#${letter}${number}`).html(`
-                ${
-                    val.type === 'Pawn' ? `<div class="team-${val.team === 1 ? 'white' : 'black' }"><img src="modules/chess/img/chess-pawn.svg"/></div>` :
-                    val.type === 'Rook' ? `<div class="team-${val.team === 1 ? 'white' : 'black' }"><img src="modules/chess/img/chess-rook.svg"/></div>` :
-                    val.type === 'Knight' ? `<div class="team-${val.team === 1 ? 'white' : 'black' }"><img src="modules/chess/img/chess-knight.svg"/></div>` :
-                    val.type === 'Bishop' ? `<div class="team-${val.team === 1 ? 'white' : 'black' }"><img src="modules/chess/img/chess-bishop.svg"/></div>` :
-                    val.type === 'Queen' ? `<div class="team-${val.team === 1 ? 'white' : 'black' }"><img src="modules/chess/img/chess-queen.svg"/></div>` : 
-                    `<div class="team-${val.team === 1 ? 'white' : 'black' }"><img src="modules/chess/img/chess-king.svg"/></div>`
-                }
-            `)
-        }
-
-    }))
-})

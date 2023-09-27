@@ -68,16 +68,27 @@ io.sockets.on('connection', function(socket)
 	socket.on('startChessGame', function () 
 	{
 		socket.join("chessRoom");
-		let data = {grid: chessGame.setupGame()}
+		let data = chessGame.setupGame()
 		io.to("chessRoom").emit("startChessGame", data);
 	})
 
     socket.on("pieceMove", function (data)
 	{
-		let feedback = {grid: chessGame.moveTo(data.case0, data.case1)}
+		let feedback = chessGame.moveTo(data.case0, data.case1)
 		io.to("chessRoom").emit("pieceMove", feedback);
 	});
 
+	socket.on("pieceSelected", function (data)
+	{
+		let feedback = chessGame.getPieceMovePossibilities(data)
+		io.to("chessRoom").emit("pieceSelected", feedback);
+	});
+
+	socket.on("pieceMovedTo", function (data)
+	{
+		let feedback = chessGame.pieceMovedTo(data)
+		io.to("chessRoom").emit("pieceMovedTo", feedback);
+	});
 
 
 

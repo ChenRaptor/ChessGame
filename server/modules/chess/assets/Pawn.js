@@ -25,7 +25,7 @@ class Pawn
 
     matriceMove()
     {
-        if (this.firstDisplacement = true) {
+        if (this.firstDisplacement === true) {
             return [
                 [0,2,0],
                 [0,0,0],
